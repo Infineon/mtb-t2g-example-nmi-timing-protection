@@ -9,7 +9,7 @@ The device used in this code example (CE) is:
 
 ## Board
 The board used for testing is:
-- TRAVEO™ T2G evaluation kit (`KIT_T2G-B-H_EVK`, `KIT_T2G_B-H_LITE`)
+- TRAVEO™ T2G evaluation kit (`KIT_T2G-B-H_EVK`, `KIT_T2G-B-H_LITE`)
 
 ## Scope of work
 In this example, the Interrupt Service Routine (ISR) processing time is protected. If the processing time limit is exceeded, an NMI is generated and appropriate action can be taken.
