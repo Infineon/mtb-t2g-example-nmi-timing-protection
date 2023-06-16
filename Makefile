@@ -48,7 +48,7 @@ TARGET=APP_KIT_T2G-B-H_EVK
 #
 # If APPNAME is edited, ensure to update or regenerate launch
 # configurations for your IDE.
-APPNAME=mtb-example-hal-hello-world
+APPNAME=mtb-t2g-example-nmi-timing-protection
 
 # Name of toolchain to use. Options include:
 #

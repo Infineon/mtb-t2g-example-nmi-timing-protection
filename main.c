@@ -72,7 +72,7 @@ const cy_stc_sysint_t IRQ_CFG_1 =
  *  This function starts timer after setting counter value to zero.
  * Parameters:
  *  none
- * Retrun:
+ * Return:
  *  none
  **********************************************************************************************************************
  */
@@ -88,7 +88,7 @@ static void start_TCPWM_Counter(TCPWM_Type *base, uint32_t cntNum)
  *  This is the handler function for counter interrupt.
  * Parameters:
  *  none
- * Retrun:
+ * Return:
  *  none
  **********************************************************************************************************************
  */
@@ -137,7 +137,7 @@ static void handle_TCPWM_Counter_Interrupt(void)
  *  This function overrides Default_NMIException_Handler, directly registered to __Vectors.
  * Parameters:
  *  none
- * Retrun:
+ * Return:
  *  none
  **********************************************************************************************************************
  */
@@ -166,16 +166,22 @@ void NMIException_Handler(void)
  *  The handler of one is set as IRQ, another is set as NMI.
  * Parameters:
  *  none
- * Retrun:
+ * Return:
  *  none
  **********************************************************************************************************************
  */
 static void init_Timer(void)
 {
     /* Initialize TCPWM0_GRPx_CNTx_COUNTER 0 as Counter */
-    CY_ASSERT(Cy_TCPWM_Counter_Init(COUNTER_1S_HW, COUNTER_1S_NUM, &COUNTER_1S_config) == CY_TCPWM_SUCCESS);
+    if (Cy_TCPWM_Counter_Init(COUNTER_1S_HW, COUNTER_1S_NUM, &COUNTER_1S_config) != CY_TCPWM_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
     /* Initialize TCPWM0_GRPx_CNTx_COUNTER 1 as Counter */
-    CY_ASSERT(Cy_TCPWM_Counter_Init(COUNTER_2S_HW, COUNTER_2S_NUM, &COUNTER_2S_config) == CY_TCPWM_SUCCESS);
+    if (Cy_TCPWM_Counter_Init(COUNTER_2S_HW, COUNTER_2S_NUM, &COUNTER_2S_config) != CY_TCPWM_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
     /* Enable TCPWM0_GRPx_CNTx_COUNTER 0 */
     Cy_TCPWM_Counter_Enable(COUNTER_1S_HW, COUNTER_1S_NUM);
     /* Enable TCPWM0_GRPx_CNTx_COUNTER 1 */
@@ -189,8 +195,14 @@ static void init_Timer(void)
     Cy_SysInt_SetNmiSource(CY_SYSINT_NMI1, tcpwm_0_interrupts_1_IRQn);
 
     /*  Interrupt setting for TCPWMs  */
-    CY_ASSERT(Cy_SysInt_Init(&IRQ_CFG_0, handle_TCPWM_Counter_Interrupt) == CY_SYSINT_SUCCESS);
-    CY_ASSERT(Cy_SysInt_Init(&IRQ_CFG_1, NMIException_Handler) == CY_SYSINT_SUCCESS);
+    if (Cy_SysInt_Init(&IRQ_CFG_0, handle_TCPWM_Counter_Interrupt) != CY_SYSINT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
+    if (Cy_SysInt_Init(&IRQ_CFG_1, NMIException_Handler) != CY_SYSINT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
 
     /* Enable the Interrupt */
     NVIC_EnableIRQ(NvicMux4_IRQn);
@@ -202,7 +214,7 @@ static void init_Timer(void)
  *  This is the main function.
  * Parameters:
  *  none
- * Retrun:
+ * Return:
  *  int
  **********************************************************************************************************************
  */
@@ -212,29 +224,47 @@ int main(void)
     cyhal_wdt_t wdtObj;
 
     /* Clear watchdog timer so that it doesn't trigger a reset */
-    CY_ASSERT(cyhal_wdt_init(&wdtObj, cyhal_wdt_get_max_timeout_ms()) == CY_RSLT_SUCCESS);
+    if (cyhal_wdt_init(&wdtObj, cyhal_wdt_get_max_timeout_ms()) != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
     cyhal_wdt_free(&wdtObj);
 #endif /* #if defined (CY_DEVICE_SECURE) */
 
     /* Initialize the device and board peripherals */
-    CY_ASSERT(cybsp_init() == CY_RSLT_SUCCESS);
+    if (cybsp_init() != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
 
     /* Enable global interrupts */
     __enable_irq();
 
     /* Initialize retarget-io to use the debug UART port */
-    CY_ASSERT(cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX,
-                                  CY_RETARGET_IO_BAUDRATE) == CY_RSLT_SUCCESS);
+    if (cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX,
+                                  CY_RETARGET_IO_BAUDRATE) != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
 
     /* Initialize the User LED */
-    CY_ASSERT(cyhal_gpio_init(CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT,
-                              CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF) == CY_RSLT_SUCCESS);
-    CY_ASSERT(cyhal_gpio_init(CYBSP_USER_LED2, CYHAL_GPIO_DIR_OUTPUT,
-                              CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF) == CY_RSLT_SUCCESS);
+    if (cyhal_gpio_init(CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT,
+                              CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF) != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
+    if (cyhal_gpio_init(CYBSP_USER_LED2, CYHAL_GPIO_DIR_OUTPUT,
+                              CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF) != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
 
     /* Initialize the User Button */
-    CY_ASSERT(cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
-                              CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF) == CY_RSLT_SUCCESS);
+    if (cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT,
+                              CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF) != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
 
     /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
     printf("\x1b[2J\x1b[;H");

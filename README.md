@@ -9,7 +9,7 @@ The device used in this code example (CE) is:
 
 ## Board
 The board used for testing is:
-- TRAVEO™ T2G evaluation kit (`KIT_T2G-B-H_EVK`, `KIT_T2G-B-H_LITE`)
+- TRAVEO™ T2G evaluation kit ([KIT_T2G-B-H_EVK](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_evk/), [KIT_T2G-B-H_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_lite/))
 
 ## Scope of work
 In this example, the Interrupt Service Routine (ISR) processing time is protected. If the processing time limit is exceeded, an NMI is generated and appropriate action can be taken.
@@ -34,61 +34,66 @@ CPU interrupts support DeepSleep (WIC) functionality.
 - Configurable priority levels (eight levels for Cortex-M7 and four levels for Cortex-M0+) for each interrupt
 - Level-triggered interrupt signals
 
-More details can be found in [Technical Reference Manual (TRM)](https://www.cypress.com/documentation/technical-reference-manuals/traveo-ii-automotive-body-controller-high-family), [Registers TRM](https://www.cypress.com/documentation/technical-reference-manuals/traveo-t2g-tvii-b-h-8m-registers-body-controller-high) and [Data Sheet](https://www.cypress.com/documentation/datasheets/cyt4bf-datasheet-32-bit-arm-cortex-m7-microcontroller-traveo-ii-family).
+More details can be found in [Technical Reference Manual (TRM)](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600bfae720007), [Registers TRM](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600be2aef0004) and [Data Sheet](https://www.infineon.com/dgdl/?fileId=5546d46275b79adb0175dc8387f93228).
 
 ## Hardware setup
+
 This CE has been developed for:
-- TRAVEO™ T2G evaluation kit (`KIT_T2G-B-H_EVK`)<BR>
-<img src="./images/KIT_T2G-B-H_EVK.gif" width="800" /><BR>
+- TRAVEO™ T2G evaluation kit ([KIT_T2G-B-H_EVK](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_evk/))<BR>
+<img src="./images/KIT_T2G-B-H_EVK.gif"/><BR>
 No changes are required from the board's default settings.
+- TRAVEO™ T2G evaluation kit lite ([KIT_T2G-B-H_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_lite/))<BR>
+<img src="./images/KIT_T2G-B-H_LITE.gif"/><BR>  
+No changes are required from the board's default settings.
+
 
 ## Implementation
 This design consists of two TCPWM counters, two user LEDs, and a user button. The counter is set to run at 1Hz and generate interrupt subject to processing time protection. When the ISR is activated, it first starts another counter running with 2Hz. The second counter generates an NMI to detect that the ISR processing time has exceeded 2s. Then waits until the user button is pressed. If the button is not pressed within 2s, an NMI is generated.
 
 **STDOUT setting**
 
-Initialization of the GPIO for UART is done in the [cy_retarget_io_init()](https://infineon.github.io/retarget-io/html/group__group__board__libs.html#ga21265301bf6e9239845227c2aead9293) function.
+Initialization of the GPIO for UART is done in the <a href="https://infineon.github.io/retarget-io/html/group__group__board__libs.html#ga21265301bf6e9239845227c2aead9293"><i>cy_retarget_io_init()</i></a> function.
 - Initialize the pin specified by CYBSP_DEBUG_UART_TX as UART TX, the pin specified by CYBSP_DEBUG_UART_RX as UART RX (these pins are connected to KitProg3 COM port)
-- The serial port parameters becomes to 8N1 and 115200 baud
+- The serial port parameters become to 8N1 and 115200 baud
 
 **GPIO port pin initialization**
 
-Initialization of the GPIO port pin is done once in the [Cy_GPIO_Pin_Init()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__gpio__functions__init.html#gad61553f65d4e6bd827eb6464a7913461) function.
+Initialization of the GPIO port pin is done once in the <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__gpio__functions__init.html#gad61553f65d4e6bd827eb6464a7913461"><i>Cy_GPIO_Pin_Init()</i></a> function.
 - Initialize the pin specified by CYBSP_USER_LED1/CYBSP_USER_LED2 as output (initial level = H, LED turns off)
 - Initialize the pin specified by CYBSP_USER_BTN as input
 
 **TCPWM initialization**
 
-API calls for the TCPWM initialization is done in `init_Timer()` function.
-- To initialize TCPWM counters, [Cy_TCPWM_Counter_Init()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__counter.html#ga6068a06ddc8a07c67bb6df86e920944c) is called with using structure [cy_stc_tcpwm_counter_config_t](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/structcy__stc__tcpwm__counter__config__t.html) which are auto-coded by Device Configurator as argument
+API calls for the TCPWM initialization is done in *init_Timer()* function.
+- To initialize TCPWM counters, <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__counter.html#ga6068a06ddc8a07c67bb6df86e920944c"><i>Cy_TCPWM_Counter_Init()</i></a> is called with using structure <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/structcy__stc__tcpwm__counter__config__t.html"><i>cy_stc_tcpwm_counter_config_t</i></a> which are auto-coded by Device Configurator as argument
 
     - *Figure 1. 1s counter setting*<BR><img src="./images/counter1.png" width="800"/>
     - *Figure 2. 2s counter setting*<BR><img src="./images/counter2.png" width="800"/>
 
-- Then both counters are enabled by [Cy_TCPWM_Counter_Enable()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__counter.html#ga1707e2cc291fe486fbea346157c65bff), and their Compare 0 interrupt is enabled by [Cy_TCPWM_SetInterruptMask()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#ga47ec0d6214c01f67774fb97b9c3f0878)
-- For enroll 2s counter to generate NMI exception on its expiration, [Cy_SysInt_SetNmiSource()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__sysint__functions.html#ga3163ed7de473929acded134fc67ab997) is called
-- Next, register a handler for each counter by [Cy_SysInt_Init()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__sysint__functions.html#gab2ff6820a898e9af3f780000054eea5d)
-- Last, `NVIC_EnableIRQ()` is called to enable IRQ
+- Then both counters are enabled by <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__counter.html#ga1707e2cc291fe486fbea346157c65bff"><i>Cy_TCPWM_Counter_Enable()</i></a>, and their Compare 0 interrupt is enabled by <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#ga47ec0d6214c01f67774fb97b9c3f0878"><i>Cy_TCPWM_SetInterruptMask()</i></a>
+- For enroll 2s counter to generate NMI exception on its expiration, <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__sysint__functions.html#ga3163ed7de473929acded134fc67ab997"><i>Cy_SysInt_SetNmiSource()</i></a> is called
+- Next, register a handler for each counter by <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__sysint__functions.html#gab2ff6820a898e9af3f780000054eea5d"><i>Cy_SysInt_Init()</i></a>
+- Last, *NVIC_EnableIRQ()* is called to enable IRQ
 
 **Start 1s counter**
 
-If main loop detects the 1s counter is not started, it calls `start_TCPWM_Counter()` function to start it.
-- At first it clears the counter by calling [Cy_TCPWM_Counter_SetCounter()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__counter.html#gab1b0e66e97b06eb7fb2ab14aabab7975)
-- Then it triggers the counter by calling [Cy_TCPWM_TriggerStart_Single()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#gaafe86ec440bec9a2c23392f289cc3a8b)
+If main loop detects the 1s counter is not started, it calls *start_TCPWM_Counter()* function to start it.
+- At first it clears the counter by calling <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__counter.html#gab1b0e66e97b06eb7fb2ab14aabab7975"><i>Cy_TCPWM_Counter_SetCounter()</i></a>
+- Then it triggers the counter by calling <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#gaafe86ec440bec9a2c23392f289cc3a8b"><i>Cy_TCPWM_TriggerStart_Single()</i></a>
 
 **ISR of 1s counter**
 
-The ISR function for 1s counter is `handle_TCPWM_Counter_Interrupt()`.
-- At first, checking if the intended interrupt has occurred by [Cy_TCPWM_GetInterruptStatusMasked()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#gabb00d4f53ff5db82aa6f5e5ae0e79f8a) before start ISR process
-- Then, After clearing the interrupt by [Cy_TCPWM_ClearInterrupt()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#ga0c7a2d667dc983c82327463529f5d283), start the 2s counter which expiration set as NMI by calling `start_TCPWM_Counter()` function to protect timing
-- Next, the LED indicating the start of the ISR process is lit by calling [cyhal_gpio_write()](https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#gaf66e7c3ed7b3b0711635d7687ae92291), and waits until the user button is pressed by calling [cyhal_gpio_read()](https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#ga3d38f1dd86c2e74b8ad10f1f6d1945c2)
-- Once the user button is pressed, stop the 2s counter by calling [Cy_TCPWM_TriggerStopOrKill_Single()](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#gad1459b0ddabf388afe151de57f7cf4d4) and turn off the LED by calling [cyhal_gpio_write()](https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#gaf66e7c3ed7b3b0711635d7687ae92291)
+The ISR function for 1s counter is *handle_TCPWM_Counter_Interrupt()*.
+- At first, checking if the intended interrupt has occurred by <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#gabb00d4f53ff5db82aa6f5e5ae0e79f8a"><i>Cy_TCPWM_GetInterruptStatusMasked()</i></a> before start ISR process
+- Then, After clearing the interrupt by <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#ga0c7a2d667dc983c82327463529f5d283"><i>Cy_TCPWM_ClearInterrupt()</i></a>, start the 2s counter which expiration set as NMI by calling *start_TCPWM_Counter()* function to protect timing
+- Next, the LED indicating the start of the ISR process is lit by calling <a href="https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#gaf66e7c3ed7b3b0711635d7687ae92291"><i>cyhal_gpio_write()</i></a>, and waits until the user button is pressed by calling <a href="https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#ga3d38f1dd86c2e74b8ad10f1f6d1945c2"><i>cyhal_gpio_read()</i></a>
+- Once the user button is pressed, stop the 2s counter by calling <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__tcpwm__functions__common.html#gad1459b0ddabf388afe151de57f7cf4d4"><i>Cy_TCPWM_TriggerStopOrKill_Single()</i></a> and turn off the LED by calling <a href="https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#gaf66e7c3ed7b3b0711635d7687ae92291"><i>cyhal_gpio_write()</i></a>
 
 **Detection of timing overruns**
 
-If the processing time of the ISR is not finished within 2sec, `handle_NMI_Exception()` function will be called as NMI exception.
+If the processing time of the ISR is not finished within 2sec, *handle_NMI_Exception()* function will be called as NMI exception.
 - The confirmation and clearing of interrupt is same as the ISR of 1sec counter
-- In this example, the action of timing overrun detection is only to lit the LED by [gpio_hal_write()](https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#gaf66e7c3ed7b3b0711635d7687ae92291), but it can be implemented other action to ensure the safety of the system
+- In this example, the action of timing overrun detection is only to lit the LED by <a href="https://infineon.github.io/psoc6hal/html/group__group__hal__gpio.html#gaf66e7c3ed7b3b0711635d7687ae92291"><i>gpio_hal_write()</i></a>, but it can be implemented other action to ensure the safety of the system
 
 ## Run and Test
 For this example, a terminal emulator is required for displaying outputs. Install a terminal emulator if you do not have one. Instructions in this document use [Tera Term](https://ttssh2.osdn.jp/index.html.en).
@@ -103,18 +108,18 @@ After code compilation, perform the following steps to flashing the device:
 
     - *Figure 3. Terminal output on program startup*<BR><img src="./images/terminal.png" width="640" />
 
-5. You can debug the example to step through the code. In the IDE, use the **[Project Name] Debug (KitProg3_MiniProg4)** configuration in the **Quick Panel**. For details, see the "Program and debug" section in the [Eclipse IDE for ModusToolbox™ software user guide](https://www.cypress.com/MTBEclipseIDEUserGuide).
+5. You can debug the example to step through the code. In the IDE, use the **[Project Name] Debug (KitProg3_MiniProg4)** configuration in the **Quick Panel**. For details, see the "Program and debug" section in the [Eclipse IDE for ModusToolbox™ software user guide](https://www.infineon.com/dgdl/?fileId=8ac78c8c8386267f0183a8d7043b58ee).
 
-**Note:** **(Only while debugging)** On the CM7 CPU, some code in `main()` may execute before the debugger halts at the beginning of `main()`. This means that some code executes twice ? once before the debugger stops execution, and again after the debugger resets the program counter to the beginning of `main()`. See [KBA231071](https://community.cypress.com/docs/DOC-21143) to learn about this and for the workaround.
+**Note:** **(Only while debugging)** On the CM7 CPU, some code in *main()* may execute before the debugger halts at the beginning of *main()*. This means that some code executes twice: once before the debugger stops execution, and again after the debugger resets the program counter to the beginning of *main()*. See [KBA231071](https://community.infineon.com/t5/Knowledge-Base-Articles/PSoC-6-MCU-Code-in-main-executes-before-the-debugger-halts-at-the-first-line-of/ta-p/253856) to learn about this and for the workaround.
 
 
 ## References  
 
 Relevant Application notes are:
 - AN235305 - GETTING STARTED WITH TRAVEO™ T2G FAMILY MCUS IN MODUSTOOLBOX™
-- [AN224434](https://www.infineon.com/dgdl/Infineon-AN224434_Clock_Configuration_Setup_in_Traveo_II_Family_CYT4B_Series-ApplicationNotes-v03_00-EN.pdf?fileId=8ac78c8c7cdc391c017d0d3a71ec674a) - Clock configuration setup in TRAVEO™ T2G family CYT4B series
-- [AN219842](https://www.infineon.com/dgdl/Infineon-AN219842_How_to_use_interrupt_in_TRAVEO_II-ApplicationNotes-v07_00-EN.pdf?fileId=8ac78c8c7cdc391c017d0d3a490a6732) - How to use interrupt in TRAVEO™ II
-- <a href="https://www.infineon.com/dgdl/Infineon-AN220224_How_to_Use_Timer_Counter_and_PWM_(TCPWM)_in_Traveo_II_Family-ApplicationNotes-v04_00-EN.pdf?fileId=8ac78c8c7cdc391c017d0d3a800a6752">AN220224</a> - How to Use Timer, Counter, and PWM (TCPWM) in Traveo II Family
+- [AN224434](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a71ec674a) - Clock configuration setup in TRAVEO™ T2G family CYT4B series
+- [AN219842](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a490a6732) - How to use interrupt in TRAVEO™ II
+- [AN220224](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a800a6752) - How to Use Timer, Counter, and PWM (TCPWM) in Traveo II Family
 
 ModusToolbox™ is available online:
 - <https://www.infineon.com/modustoolbox>
